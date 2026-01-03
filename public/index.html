@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Webhook Manager</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-grad: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+            --danger-grad: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            --success-grad: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            --info-grad: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Smooth Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: var(--glass-border);
+            padding: 1.5rem 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Inputs */
+        .form-control, .input-group-text {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: var(--glass-border);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+        }
+        .form-control:focus {
+            background-color: rgba(15, 23, 42, 0.9);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+            color: white;
+        }
+        .input-group-text {
+            color: var(--text-muted);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .card-header {
+            background: transparent;
+            border-bottom: var(--glass-border);
+            padding: 1.25rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        /* Buttons */
+        .btn {
+            font-weight: 500;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: var(--primary-grad);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+            opacity: 0.95;
+            color: white;
+        }
+        .btn-danger {
+            background: var(--danger-grad);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+            color: white;
+        }
+        .btn-info {
+            background: var(--info-grad);
+            color: white;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+        }
+        .btn-info:hover {
+            color: white;
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+        }
+        .btn-outline-primary {
+            color: #818cf8;
+            border-color: rgba(129, 140, 248, 0.3);
+        }
+        .btn-outline-primary:hover {
+            background: rgba(129, 140, 248, 0.1);
+            color: #c7d2fe;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #0b0f19;
+            color: #a5b4fc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #1e293b;
+            position: relative;
+        }
+        .code-block::before {
+            content: "TERMINAL OUTPUT";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            color: #64748b;
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 12px 12px 0 0;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+        }
+        
+        /* Bot Avatar */
+        .avatar-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .avatar-glow {
+            position: absolute;
+            inset: -4px;
+            background: var(--primary-grad);
+            border-radius: 50%;
+            filter: blur(8px);
+            opacity: 0.6;
+            z-index: 0;
+        }
+        .avatar-img {
+            position: relative;
+            z-index: 1;
+            border: 3px solid #1e293b;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            background: #1e293b;
+        }
+
+        /* Utilities */
+        .text-accent { color: #818cf8; }
+        .text-custom-muted { color: #64748b; }
+        
+        /* Toast */
+        .toast-container {
+            z-index: 1050;
+        }
+        .toast {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            color: white;
+        }
+
+        footer {
+            margin-top: auto;
+            border-top: var(--glass-border);
+            padding: 2rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-robot me-2"></i>Arsynox
+            </a>
+            
+            <div class="ms-auto w-100 w-lg-auto" style="max-width: 700px;">
+                <div class="input-group shadow-lg">
+                    <span class="input-group-text border-0" style="background: #1e293b;">
+                        <i class="bi bi-key"></i>
+                    </span>
+                    <input 
+                        type="password" 
+                        class="form-control border-0" 
+                        placeholder="Paste Bot Token..." 
+                        v-model="token"
+                        @keyup.enter="checkToken"
+                    >
+                    <button 
+                        class="btn btn-outline-secondary border-0" 
+                        style="background: #1e293b; color: #94a3b8;"
+                        type="button" 
+                        @click="toggleTokenVisibility"
+                    >
+                        <i :class="showToken ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                    </button>
+                    <button 
+                        class="btn btn-primary border-0" 
+                        type="button" 
+                        @click="checkToken"
+                        :disabled="loading"
+                    >
+                        <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        Connect
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="liveToast" class="toast align-items-center" :class="toast.type === 'error' ? 'text-danger' : 'text-success'" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center">
+                    <i :class="toast.type === 'error' ? 'bi bi-exclamation-octagon me-2' : 'bi bi-check-circle me-2'" style="font-size: 1.2rem;"></i>
+                    {{ toast.message }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close" @click="toast.show = false"></button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container py-5">
+        
+        <div class="row g-4">
+            
+            <!-- Bot Details Profile Card -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-person-badge me-2 text-accent"></i>Bot Profile</span>
+                        <button class="btn btn-sm btn-outline-primary" @click="checkToken" :disabled="loading || !token">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <div class="card-body text-center py-4">
+                        
+                        <div v-if="botInfo">
+                            <div class="avatar-wrapper mb-3">
+                                <div class="avatar-glow"></div>
+                                <img :src="`https://api.adorable.io/avatars/285/${botInfo.username}`" class="avatar-img" alt="Bot Avatar">
+                            </div>
+                            <h4 class="fw-bold mb-1">{{ botInfo.first_name }} {{ botInfo.last_name || '' }}</h4>
+                            <p class="text-accent mb-3 fw-medium">@{{ botInfo.username }}</p>
+                            
+                            <div class="d-flex justify-content-center gap-2 mb-3">
+                                <span class="badge rounded-pill bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3">
+                                    Active
+                                </span>
+                                <span class="badge rounded-pill bg-dark text-secondary px-3">
+                                    ID: {{ botInfo.id }}
+                                </span>
+                            </div>
+
+                            <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.03);">
+                                <p class="small text-custom-muted mb-0">Bot can join groups</p>
+                                <i :class="botInfo.can_join_groups ? 'bi bi-check-lg text-success' : 'bi bi-x-lg text-danger'"></i>
+                            </div>
+                        </div>
+
+                        <div v-else class="py-4">
+                            <div class="mb-3 text-custom-muted">
+                                <i class="bi bi-plug display-4 d-block mb-2"></i>
+                                <span>Waiting for connection...</span>
+                            </div>
+                            <p class="small text-muted">Enter your token above to initialize.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webhook Control -->
+            <div class="col-lg-8 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-sliders me-2 text-accent"></i>Configuration
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Set Webhook Form -->
+                        <div class="mb-5">
+                            <label class="form-label text-uppercase small fw-bold text-muted ls-1">Set Webhook URL</label>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text bg-dark border-0 text-muted"><i class="bi bi-globe"></i></span>
+                                <input type="url" class="form-control bg-dark border-0 text-white shadow-sm" placeholder="https://your-server.com/webhook" v-model="webhookUrl">
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-primary px-4" @click="setWebhook" :disabled="loading || !webhookUrl || !token">
+                                    <i class="bi bi-upload me-2"></i>Deploy Webhook
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="border-secondary opacity-25">
+
+                        <!-- Status & Actions -->
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <label class="form-label text-uppercase small fw-bold text-muted ls-1">Current Status</label>
+                                <div v-if="webhookInfo">
+                                    <div v-if="webhookInfo.url" class="d-flex align-items-center mb-1 text-success">
+                                        <div class="spinner-grow spinner-grow-sm me-2" role="status"></div>
+                                        <span class="fw-medium">Listening</span>
+                                    </div>
+                                    <div v-else class="d-flex align-items-center mb-1 text-warning">
+                                        <i class="bi bi-dash-circle me-2"></i>
+                                        <span class="fw-medium">Idle</span>
+                                    </div>
+                                    
+                                    <code class="d-block bg-dark bg-opacity-50 p-2 rounded border border-secondary border-opacity-25 text-info" style="font-size: 0.85rem;">
+                                        {{ webhookInfo.url || 'No URL configured' }}
+                                    </code>
+                                    
+                                    <div class="mt-2 small text-custom-muted">
+                                        <i class="bi bi-clock-history me-1"></i> Pending Updates: {{ webhookInfo.pending_update_count }}
+                                    </div>
+                                </div>
+                                <div v-else class="text-muted small fst-italic">
+                                    Click "Get Info" to verify configuration.
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <button class="btn btn-info w-100 mb-2" @click="getWebhookInfo" :disabled="loading || !token">
+                                    <i class="bi bi-terminal me-1"></i> Get Info
+                                </button>
+                                <button class="btn btn-danger w-100" @click="deleteWebhook" :disabled="loading || !token">
+                                    <i class="bi bi-trash3 me-1"></i> Unset
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debug Console -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-terminal me-2 text-accent"></i>Console Output</span>
+                        <button class="btn btn-sm btn-outline-dark rounded-circle" style="width: 30px; height: 30px; padding:0; display:flex; align-items:center; justify-content:center;" @click="clearLog">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="code-block">
+                            <template v-if="rawResponse">{{ rawResponse }}</template>
+                            <template v-else class="text-secondary">
+                                <span class="text-muted">// Ready for input...</span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="text-center">
+        <div class="container">
+            <span class="opacity-75 small">Designed & Engineered by <strong class="text-white">Arsynox</strong></span>
+        </div>
+    </footer>
+</div>
+
+<!-- Vue.js 3 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<!-- Bootstrap Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const { createApp, ref, reactive, watch, onMounted } = Vue;
+
+    createApp({
+        setup() {
+            // State
+            const token = ref('');
+            const showToken = ref(false);
+            const webhookUrl = ref('');
+            const botInfo = ref(null);
+            const webhookInfo = ref(null);
+            const rawResponse = ref('// Ready for input...');
+            const loading = ref(false);
+            
+            const toast = reactive({
+                show: false,
+                message: '',
+                type: 'success'
+            });
+
+            // Toast Logic
+            const showToast = (msg, type = 'success') => {
+                toast.message = msg;
+                toast.type = type;
+                toast.show = true;
+                const bsToast = new bootstrap.Toast(document.getElementById('liveToast'), { delay: 4000 });
+                bsToast.show();
+            };
+
+            // Utility
+            const formatJson = (data) => {
+                return JSON.stringify(data, null, 2);
+            };
+
+            // Core API Caller
+            const callApi = async (method, payload = null) => {
+                if (!token.value) {
+                    showToast("Please enter a Bot Token first.", "error");
+                    return null;
+                }
+
+                loading.value = true;
+                const url = `https://api.telegram.org/bot${token.value}/${method}`;
+
+                try {
+                    const options = {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+
+                    if (payload) options.body = JSON.stringify(payload);
+
+                    const response = await fetch(url, options);
+                    const data = await response.json();
+
+                    rawResponse.value = formatJson(data);
+
+                    if (!data.ok) {
+                        showToast(`API Error: ${data.description}`, "error");
+                        return null;
+                    }
+
+                    return data.result;
+                } catch (error) {
+                    const errorObj = { error: error.message, stack: error.stack };
+                    rawResponse.value = formatJson(errorObj);
+                    showToast(`Network Error: ${error.message}`, "error");
+                    return null;
+                } finally {
+                    loading.value = false;
+                }
+            };
+
+            // Actions
+            const checkToken = async () => {
+                const result = await callApi('getMe');
+                if (result) {
+                    botInfo.value = result;
+                    showToast(`Connected to @${result.username}`);
+                    // If we just connected, let's also fetch webhook info automatically
+                    getWebhookInfo();
+                }
+            };
+
+            const setWebhook = async () => {
+                if (!webhookUrl.value) {
+                    showToast("Please enter a Webhook URL", "error");
+                    return;
+                }
+                const payload = { url: webhookUrl.value };
+                const result = await callApi('setWebhook', payload);
+                if (result) {
+                    showToast("Webhook deployed successfully!");
+                    getWebhookInfo();
+                }
+            };
+
+            const deleteWebhook = async () => {
+                // Confirm before delete
+                if(!confirm("Are you sure you want to delete the webhook? The bot will stop receiving updates.")) return;
+
+                const result = await callApi('deleteWebhook');
+                if (result) {
+                    webhookInfo.value = null;
+                    webhookUrl.value = ''; 
+                    showToast("Webhook removed.");
+                }
+            };
+
+            const getWebhookInfo = async () => {
+                const result = await callApi('getWebhookInfo');
+                if (result) {
+                    webhookInfo.value = result;
+                    if(result.url) webhookUrl.value = result.url;
+                }
+            };
+
+            const clearLog = () => {
+                rawResponse.value = '// Console cleared.';
+            };
+
+            const toggleTokenVisibility = () => {
+                showToken.value = !showToken.value;
+                const input = document.querySelector('input[placeholder="Paste Bot Token..."]');
+                if (input) input.type = showToken.value ? 'text' : 'password';
+            };
+
+            return {
+                token, showToken, webhookUrl, botInfo, webhookInfo, rawResponse, loading, toast,
+                checkToken, setWebhook, deleteWebhook, getWebhookInfo, clearLog, toggleTokenVisibility
+            };
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>
